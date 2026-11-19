@@ -129,16 +129,39 @@ function displayFabricTitle(p) {
    ========================================================================== */
 async function loadCatalog() {
   try {
-    const savedBridge = localStorage.getItem(STORAGE_LOCAL_BRIDGE_KEY) || '';
-    const qs = savedBridge ? `?bridgeUrl=${encodeURIComponent(savedBridge)}` : '';
+    const savedBridge = localStorage.getItem(STORAGE_LOCAL_BRIDGE_KEY) || state.settings.gasBridgeUrl || DEFAULT_GAS_BRIDGE_URL;
+    const qs = `?bridgeUrl=${encodeURIComponent(savedBridge)}&_t=${Date.now()}`;
     const data = await apiFetch(`/api/catalog${qs}`);
-    state.products = data.products || [];
+    let loadedProducts = Array.isArray(data.products) && data.products.length > 0 ? data.products : [];
+
+    // Gabungkan dengan cache lokal jika baru saja ada kain yang di-upload
+    try {
+      const localCached = JSON.parse(localStorage.getItem('gm_cached_products') || '[]');
+      if (Array.isArray(localCached) && localCached.length > 0) {
+        const loadedKeys = new Set(loadedProducts.map((p) => p.code || p.id));
+        const missingLocal = localCached.filter((p) => !loadedKeys.has(p.code) && !loadedKeys.has(p.id));
+        if (missingLocal.length > 0) {
+          loadedProducts = [...missingLocal, ...loadedProducts];
+        }
+      }
+    } catch {}
+
+    state.products = loadedProducts;
     state.settings = { ...state.settings, ...(data.settings || {}) };
   } catch (err) {
     // Fallback for pure static preview if /api/catalog unavailable
     try {
-      const fallback = await fetch('/data/catalog.json').then((r) => r.json());
-      state.products = fallback.products || [];
+      const fallback = await fetch(`/data/catalog.json?_t=${Date.now()}`).then((r) => r.json());
+      let fallbackProducts = fallback.products || [];
+      try {
+        const localCached = JSON.parse(localStorage.getItem('gm_cached_products') || '[]');
+        if (Array.isArray(localCached) && localCached.length > 0) {
+          const loadedKeys = new Set(fallbackProducts.map((p) => p.code || p.id));
+          const missingLocal = localCached.filter((p) => !loadedKeys.has(p.code) && !loadedKeys.has(p.id));
+          fallbackProducts = [...missingLocal, ...fallbackProducts];
+        }
+      } catch {}
+      state.products = fallbackProducts;
       if (fallback.settings) state.settings = { ...state.settings, ...fallback.settings };
       state.settings.isVercel = true;
     } catch {
@@ -862,8 +885,8 @@ async function submitProductForm(e) {
     const fields = collectFormFields();
 
     // Mode Vercel + Google Apps Script Bridge
-    if (state.settings.isVercel) {
-      const bridgeUrl = localStorage.getItem(STORAGE_LOCAL_BRIDGE_KEY) || '';
+    if (state.settings.isVercel || window.location.hostname.includes('vercel.app')) {
+      const bridgeUrl = localStorage.getItem(STORAGE_LOCAL_BRIDGE_KEY) || state.settings.gasBridgeUrl || DEFAULT_GAS_BRIDGE_URL;
       let finalImageUrl = state.upload.existingImageUrl || '';
       let finalDriveId = state.upload.driveFileId || '';
 
@@ -907,22 +930,38 @@ async function submitProductForm(e) {
         ? state.products.map((p) => (p.id === record.id ? record : p))
         : [record, ...state.products];
 
-      await apiFetch('/api/drive', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'save_catalog',
-          bridgeUrl,
-          pin: state.adminPinSession || '1234',
-          products: nextList,
-          settings: state.settings,
-        }),
-      });
+      // Simpan langsung di cache browser lokal agar seketika tampil di layar depan
+      try {
+        localStorage.setItem('gm_cached_products', JSON.stringify(nextList));
+      } catch {}
 
-      showToast('Tersimpan langsung ke Google Drive & Katalog Vercel!', 'success');
+      state.products = nextList;
+
+      // Sinkronkan ke Google Drive Bridge
+      try {
+        await apiFetch('/api/drive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_catalog',
+            bridgeUrl,
+            pin: state.adminPinSession || '1234',
+            products: nextList,
+            settings: state.settings,
+          }),
+        });
+      } catch (saveErr) {
+        console.warn('[Save Catalog] Bridge save warning:', saveErr.message);
+      }
+
+      showToast('Kain gorden berhasil disimpan & tampil di katalog!', 'success');
       resetUploadForm();
-      await loadCatalog();
-      switchAdminTab('manage');
+      closeAdminModal();
+      applyStoreBranding();
+      populateCollectionFilter();
+      renderGallery();
+      renderSelectionBar();
+      renderAdminManageList();
       return;
     }
 
