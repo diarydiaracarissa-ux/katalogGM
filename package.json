@@ -1,0 +1,13 @@
+{
+  "name": "katalog-gorden-studio",
+  "version": "1.0.0",
+  "description": "Katalog Galeri Jual Gorden Profesional dengan Admin Upload Foto Asli & Pembacaan Deskripsi Produk Otomatis dari Foto",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

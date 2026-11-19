@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f8f5f0" />
+  <title>Katalog Kain — Gorden Magelang (www.gordenmagelang.web.id)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <!-- Compact Frosted App Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 4h11a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2V4Z"/>
+            <path d="M17 7h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+            <path d="M8 9h5M8 13h5M8 17h3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <div class="brand-text">
+          <span class="brand-name" id="headerStoreName">Gorden Magelang</span>
+          <a href="https://www.gordenmagelang.web.id" target="_blank" rel="noopener" class="brand-web" id="headerMainWebLink">
+            www.gordenmagelang.web.id ↗
+          </a>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="https://wa.me/6285734103666" target="_blank" rel="noopener" class="btn-icon-pill btn-wa-soft" id="headerWaBtn" aria-label="Chat WhatsApp Gorden Magelang">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          <span class="hide-xs">0857-3410-3666</span>
+        </a>
+        <button type="button" class="btn-icon-pill btn-admin" id="openAdminBtn" aria-label="Menu Admin">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>Admin</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Clean Compact Intro + Integrated Search -->
+  <section class="hero-compact">
+    <div class="container hero-compact-inner">
+      <div class="hero-text">
+        <span class="hero-kicker">Katalog Digital Sampel Kain</span>
+        <h1 class="hero-title">Pilih <em>Jenis Kain &amp; Kode Warna</em> Favorit Anda</h1>
+        <p class="hero-desc" id="heroTagline">
+          Foto sampel asli HD — Klik foto untuk zoom detail serat &amp; label, pilih kode favorit Anda lalu kirim langsung ke WhatsApp.
+        </p>
+      </div>
+
+      <div class="hero-search-wrap">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Cari kode (NB-03A), warna (FROST), koleksi, atau bahan..."
+            autocomplete="off"
+          />
+        </div>
+        <div class="hero-quick-meta">
+          <span><strong id="statTotalProducts">0</strong> Sampel Kain</span>
+          <span class="dot-sep">•</span>
+          <span><strong id="statCollections">0</strong> Koleksi</span>
+          <span class="dot-sep">•</span>
+          <span><strong id="statSelectedCount">0</strong> Dipilih</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky Single-Row Filter Strip (Smooth Horizontal Scroll on Mobile) -->
+  <div class="filter-bar">
+    <div class="container filter-bar-inner">
+      <div class="category-scroll" id="categoryPills">
+        <button type="button" class="pill active" data-category="Semua">Semua</button>
+        <button type="button" class="pill" data-category="Blackout 100%">Blackout 100%</button>
+        <button type="button" class="pill" data-category="Blackout 80-90%">Blackout 80–90%</button>
+        <button type="button" class="pill" data-category="Dimout">Dimout</button>
+        <button type="button" class="pill" data-category="Vitrase / Sheer">Vitrase</button>
+        <button type="button" class="pill" data-category="Jacquard / Motif">Jacquard</button>
+        <button type="button" class="pill" data-category="Linen">Linen</button>
+      </div>
+
+      <div class="filter-controls">
+        <select id="collectionSelect" class="chip-select" aria-label="Pilih Koleksi">
+          <option value="Semua">Semua Koleksi</option>
+        </select>
+        <select id="sortSelect" class="chip-select hide-xs" aria-label="Urutkan">
+          <option value="code">Kode A–Z</option>
+          <option value="newest">Terbaru</option>
+          <option value="collection">Koleksi</option>
+        </select>
+        <div class="view-toggle" role="group" aria-label="Mode tampilan foto">
+          <button type="button" class="view-btn active" data-view="natural" title="Foto utuh asli tanpa crop">Utuh</button>
+          <button type="button" class="view-btn" data-view="grid" title="Grid seragam">Grid</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Swatch Gallery -->
+  <main id="galeri" class="gallery-section">
+    <div class="container">
+      <div class="gallery-grid mode-natural" id="galleryGrid"></div>
+
+      <!-- Empty State -->
+      <div class="empty-state hidden" id="emptyState">
+        <h3>Kain tidak ditemukan</h3>
+        <p>Coba kata kunci lain atau tampilkan semua koleksi kain.</p>
+        <button type="button" class="btn btn-outline btn-sm" id="resetFilterBtn">Tampilkan Semua</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Minimal Clean Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong id="footerStoreName">Gorden Magelang</strong>
+        <p id="footerAddress">Survey &amp; Ukur Gratis Magelang dan Sekitarnya • WA 0857-3410-3666</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://www.gordenmagelang.web.id" target="_blank" rel="noopener" class="footer-link-pill" id="footerMainWebLink">
+          www.gordenmagelang.web.id ↗
+        </a>
+        <a id="footerDriveLink" href="https://drive.google.com/drive/folders/1W8wTEg03Aqiv-rJHvoFngwYpg1u-Hjlw" target="_blank" rel="noopener" class="footer-link-subtle">
+          Arsip Drive ↗
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================
+       FLOATING SELECTION BAR (THUMB-FRIENDLY ON MOBILE)
+       ========================================================= -->
+  <div class="selection-bar hidden" id="selectionBar">
+    <div class="container selection-bar-inner">
+      <div class="selection-info">
+        <span class="selection-count-badge" id="selectionBarCount">0</span>
+        <div class="selection-text-col">
+          <strong>Kain Dipilih</strong>
+          <div class="selection-chips" id="selectionChips"></div>
+        </div>
+      </div>
+      <div class="selection-actions">
+        <button type="button" class="btn-mini-light" id="btnClearSelection" title="Hapus semua pilihan">Reset</button>
+        <button type="button" class="btn-mini-light" id="btnCopySelection">Salin</button>
+        <a href="#" target="_blank" rel="noopener" class="btn btn-sm btn-whatsapp" id="btnSendSelectionWa">
+          Kirim WA
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL: FABRIC DETAIL SHEET (BOTTOM SHEET ON MOBILE)
+       ========================================================= -->
+  <div class="modal-backdrop" id="productModal" aria-hidden="true">
+    <div class="modal-dialog modal-detail" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button type="button" class="modal-close" id="closeDetailModal" aria-label="Tutup detail">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="detail-layout">
+        <!-- Original Crisp Photo -->
+        <div class="detail-media">
+          <div class="detail-photo-frame" id="detailPhotoFrame" title="Klik untuk memperbesar foto asli">
+            <img id="detailImg" src="" alt="" />
+            <button type="button" class="zoom-float-btn" id="detailZoomBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+              Zoom Foto Asli HD
+            </button>
+          </div>
+          <div class="detail-photo-meta">
+            <span id="detailPhotoRes">Foto Asli HD</span>
+            <div class="palette-row" id="detailPaletteRow"></div>
+          </div>
+        </div>
+
+        <!-- Clean Fabric Specifications -->
+        <div class="detail-content">
+          <div class="detail-badges">
+            <span class="badge badge-cat" id="detailCollection">NIGHT BLOCK</span>
+            <span class="badge badge-code" id="detailCodeBadge">NB-03A</span>
+            <span class="badge badge-stock" id="detailStock">Tersedia</span>
+            <span class="badge badge-engine" id="detailEngine">OCR Label</span>
+          </div>
+
+          <h2 id="detailTitle" class="detail-title"></h2>
+          <div class="detail-price-row">
+            <span class="detail-price" id="detailPrice"></span>
+            <span class="detail-unit" id="detailUnit"></span>
+          </div>
+
+          <p id="detailDescription" class="detail-desc"></p>
+
+          <div class="analysis-specs" id="detailSpecs"></div>
+
+          <details class="raw-ocr-details" id="detailRawOcrWrap">
+            <summary>Teks label asli yang terbaca dari foto</summary>
+            <pre id="detailRawOcr"></pre>
+          </details>
+
+          <div class="detail-cta-row">
+            <button type="button" class="btn btn-select-fabric" id="detailToggleSelectBtn">
+              + Pilih Kain Ini
+            </button>
+            <a href="#" target="_blank" rel="noopener" class="btn btn-whatsapp" id="detailWaBtn">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              Tanya WA
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       LIGHTBOX: FULL-RESOLUTION ORIGINAL PHOTO VIEWER
+       ========================================================= -->
+  <div class="lightbox" id="photoLightbox" aria-hidden="true">
+    <div class="lightbox-topbar">
+      <div class="lightbox-info">
+        <strong id="lightboxTitle">Foto Asli Sampel Kain</strong>
+        <span id="lightboxMeta">Resolusi penuh</span>
+      </div>
+      <div class="lightbox-controls">
+        <button type="button" class="lb-btn" id="lightboxZoomOut" aria-label="Perkecil">−</button>
+        <span class="lb-zoom-label" id="lightboxZoomLabel">100%</span>
+        <button type="button" class="lb-btn" id="lightboxZoomIn" aria-label="Perbesar">+</button>
+        <button type="button" class="lb-btn hide-xs" id="lightboxZoomReset">Reset</button>
+        <button type="button" class="lb-btn hide-xs" id="lightboxCleanToggle">Bersih</button>
+        <a href="#" target="_blank" rel="noopener" class="lb-btn lb-btn-accent" id="lightboxOpenRaw">Asli ↗</a>
+        <button type="button" class="lb-btn lb-btn-close" id="lightboxClose" aria-label="Tutup">✕</button>
+      </div>
+    </div>
+
+    <div class="lightbox-stage" id="lightboxStage">
+      <img id="lightboxImg" src="" alt="Foto Asli Kain Gorden" draggable="false" />
+    </div>
+
+    <div class="lightbox-hint">
+      Ketuk 2× atau tekan + untuk zoom serat &amp; label • Geser foto saat diperbesar
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL: ADMIN STUDIO (UPLOAD OCR + GOOGLE DRIVE + MANAGE + SETTINGS)
+       ========================================================= -->
+  <div class="modal-backdrop" id="adminModal" aria-hidden="true">
+    <div class="modal-dialog modal-admin" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+      <div class="admin-header">
+        <div>
+          <h2 id="adminModalTitle">Menu Admin — Gorden Magelang</h2>
+          <p class="admin-subtitle">Upload foto sampel kain, baca otomatis Nama &amp; Kode dari foto, dan sinkron Google Drive</p>
+        </div>
+        <div class="admin-header-actions">
+          <button type="button" class="btn btn-ghost btn-sm hidden" id="adminLogoutBtn">Keluar</button>
+          <button type="button" class="modal-close static-close" id="closeAdminModal" aria-label="Tutup Admin">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Login View -->
+      <div class="admin-login-box" id="adminLoginView">
+        <div class="login-card">
+          <div class="login-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h3>Masuk Admin</h3>
+          <p>Masukkan PIN untuk upload foto sampel kain dan kelola katalog.</p>
+          <form id="adminLoginForm">
+            <input type="password" id="adminPinInput" placeholder="PIN Admin" inputmode="numeric" required />
+            <button type="submit" class="btn btn-primary btn-full">Masuk</button>
+          </form>
+          <p class="login-hint">PIN default: <code>1234</code></p>
+          <p class="form-error hidden" id="loginError"></p>
+        </div>
+      </div>
+
+      <!-- Authenticated Workspace -->
+      <div class="admin-workspace hidden" id="adminWorkspace">
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab active" data-tab="upload">+ Upload Foto</button>
+          <button type="button" class="admin-tab" data-tab="gdrive">Google Drive</button>
+          <button type="button" class="admin-tab" data-tab="manage">Katalog (<span id="adminProductCount">0</span>)</button>
+          <button type="button" class="admin-tab" data-tab="settings">Pengaturan</button>
+        </div>
+
+        <!-- TAB 1: UPLOAD & OCR -->
+        <div class="admin-tab-panel active" id="tabPanelUpload">
+          <div class="upload-studio-grid">
+            <div class="upload-left">
+              <div class="edit-banner hidden" id="editModeBanner">
+                <span>Edit: <strong id="editModeName"></strong></span>
+                <button type="button" class="btn-link" id="cancelEditBtn">Batal</button>
+              </div>
+
+              <label class="dropzone" id="photoDropzone" for="photoFileInput">
+                <input type="file" id="photoFileInput" accept="image/jpeg,image/png,image/webp,image/avif" hidden />
+                <div class="dropzone-empty" id="dropzoneEmpty">
+                  <div class="dropzone-icon">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </div>
+                  <strong>Ambil / Pilih Foto Sampel Kain</strong>
+                  <span>Nama Koleksi, Kode, Warna, Blackout, Komposisi &amp; Lebar otomatis terbaca dari label foto</span>
+                </div>
+
+                <div class="dropzone-preview hidden" id="dropzonePreview">
+                  <img id="uploadPreviewImg" src="" alt="Preview foto sampel kain" />
+                  <div class="scan-overlay hidden" id="scanOverlay">
+                    <div class="scan-line"></div>
+                    <span class="scan-text" id="scanStatusText">Membaca teks label kain...</span>
+                  </div>
+                </div>
+              </label>
+
+              <div class="preview-toolbar hidden" id="previewToolbar">
+                <div class="preview-meta" id="previewFileMeta"></div>
+                <div class="reader-actions">
+                  <button type="button" class="btn btn-sm btn-outline" id="btnReanalyzeOcr">Baca Label (OCR)</button>
+                  <button type="button" class="btn btn-sm btn-gold" id="btnAnalyzeGemini">AI Vision Pro</button>
+                </div>
+              </div>
+
+              <div class="detected-card hidden" id="detectedCard">
+                <div class="detected-head">
+                  <strong>Hasil Pembacaan Foto</strong>
+                  <span class="engine-pill" id="detectedEngineBadge">OCR Label</span>
+                </div>
+                <div class="detected-palette" id="detectedPalette"></div>
+                <div class="ocr-raw-preview">
+                  <small>Teks mentah dari foto:</small>
+                  <pre id="detectedRawOcr">—</pre>
+                </div>
+              </div>
+            </div>
+
+            <form class="upload-form" id="productForm">
+              <input type="hidden" id="editProductId" value="" />
+
+              <div class="form-grid-3">
+                <label class="field">
+                  <span>Koleksi / Buku Kain *</span>
+                  <input type="text" id="fCollection" placeholder="NIGHT BLOCK" required />
+                </label>
+                <label class="field">
+                  <span>Kode Kain *</span>
+                  <input type="text" id="fCode" placeholder="NB-03A" required />
+                </label>
+                <label class="field">
+                  <span>Nama Warna</span>
+                  <input type="text" id="fColorName" placeholder="FROST" />
+                </label>
+              </div>
+
+              <div class="form-grid-3">
+                <label class="field">
+                  <span>Kategori</span>
+                  <select id="fCategory">
+                    <option value="Blackout 100%">Blackout 100%</option>
+                    <option value="Blackout 80-90%">Blackout 80–90%</option>
+                    <option value="Dimout">Dimout</option>
+                    <option value="Vitrase / Sheer">Vitrase / Sheer</option>
+                    <option value="Jacquard / Motif">Jacquard / Motif</option>
+                    <option value="Linen">Linen</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Shading Degree</span>
+                  <input type="text" id="fShading" placeholder="100% Blackout" />
+                </label>
+                <label class="field">
+                  <span>Brand</span>
+                  <input type="text" id="fBrand" placeholder="SD" />
+                </label>
+              </div>
+
+              <div class="form-grid-3">
+                <label class="field">
+                  <span>Komposisi</span>
+                  <input type="text" id="fComposition" placeholder="30% Linen 70% Polyester" />
+                </label>
+                <label class="field">
+                  <span>Lebar Kain</span>
+                  <input type="text" id="fWidth" placeholder="320 cm" />
+                </label>
+                <label class="field">
+                  <span>Gramasi</span>
+                  <input type="text" id="fWeight" placeholder="260 Gsm/sq.Mtr" />
+                </label>
+              </div>
+
+              <div class="form-grid-2">
+                <label class="field">
+                  <span>Tekstur &amp; Motif</span>
+                  <input type="text" id="fPatternTexture" placeholder="Anyaman Linen Halus Polos" />
+                </label>
+                <label class="field">
+                  <span>Fire Retardant / Khusus</span>
+                  <input type="text" id="fFireRetardant" placeholder="NFPA260 / BS4881" />
+                </label>
+              </div>
+
+              <div class="form-grid-3">
+                <label class="field">
+                  <span>Harga (0 = Tanya Harga)</span>
+                  <input type="number" id="fPrice" min="0" step="5000" value="0" />
+                </label>
+                <label class="field">
+                  <span>Satuan</span>
+                  <input type="text" id="fUnit" value="per meter" />
+                </label>
+                <label class="field">
+                  <span>Status Stok</span>
+                  <select id="fStockStatus">
+                    <option value="Tersedia">Tersedia</option>
+                    <option value="Indent / Pre-Order">Indent / Pre-Order</option>
+                    <option value="Stok Terbatas">Stok Terbatas</option>
+                    <option value="Habis">Habis</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label class="field">
+                  <span>Rekomendasi Ruangan</span>
+                  <input type="text" id="fRoomRec" placeholder="Kamar Tidur Utama, Ruang Tamu" />
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label class="field">
+                  <span>Penjelasan Kain (Otomatis dari Foto) *</span>
+                  <textarea id="fDescription" rows="3" required></textarea>
+                </label>
+              </div>
+
+              <div class="form-footer">
+                <button type="button" class="btn btn-outline btn-sm" id="btnResetUploadForm">Reset</button>
+                <button type="submit" class="btn btn-primary" id="btnSaveProduct">Simpan ke Katalog</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- TAB 2: GOOGLE DRIVE & VERCEL -->
+        <div class="admin-tab-panel" id="tabPanelGdrive">
+          <div class="gdrive-panel">
+            <div class="gdrive-hero-box">
+              <div>
+                <span class="eyebrow-sm">Google Drive + Vercel</span>
+                <h3>Sinkronisasi Folder Google Drive</h3>
+                <p>Foto sampel kain di folder Drive Anda dapat langsung ditarik ke katalog dan dibaca otomatis label kodenya.</p>
+                <div class="drive-url-pill">
+                  <span>ID:</span>
+                  <code id="driveFolderIdDisplay">1W8wTEg03Aqiv-rJHvoFngwYpg1u-Hjlw</code>
+                  <a id="driveOpenFolderBtn" href="https://drive.google.com/drive/folders/1W8wTEg03Aqiv-rJHvoFngwYpg1u-Hjlw" target="_blank" rel="noopener" class="btn-link">
+                    Buka Drive ↗
+                  </a>
+                </div>
+              </div>
+              <div class="gdrive-hero-actions">
+                <button type="button" class="btn btn-primary btn-sm" id="btnSyncDriveNow">Sinkronkan Google Drive</button>
+                <button type="button" class="btn btn-outline btn-sm" id="btnExportCatalogJson">Export catalog.json</button>
+              </div>
+            </div>
+
+            <div class="drive-sync-results hidden" id="driveSyncResults">
+              <div class="drive-sync-header">
+                <strong id="driveSyncTitle">Foto di Google Drive</strong>
+                <button type="button" class="btn btn-sm btn-gold hidden" id="btnBatchImportDrive">
+                  Import &amp; Baca Semua Baru
+                </button>
+              </div>
+              <div class="drive-files-grid" id="driveFilesGrid"></div>
+            </div>
+
+            <div class="vercel-guide-card">
+              <h4>Pasang Upload Langsung dari Vercel ke Google Drive (Gratis)</h4>
+              <ol>
+                <li>Bagikan folder Drive <code>1W8wTEg03Aqiv-rJHvoFngwYpg1u-Hjlw</code> sebagai <strong>“Siapa saja yang memiliki link — Pelihat”</strong>.</li>
+                <li>Buka <a href="https://script.google.com" target="_blank" rel="noopener">script.google.com</a> → paste script Bridge → <strong>Deploy → Web app</strong> (<em>Execute as: Me</em>, <em>Who has access: Anyone</em>).</li>
+                <li>Paste <strong>Web app URL</strong> ke tab <strong>Pengaturan</strong> (atau Environment Variable <code>GAS_BRIDGE_URL</code> di Vercel).</li>
+              </ol>
+              <button type="button" class="btn btn-sm btn-outline" id="btnCopyGasScript">Salin Kode DriveCatalogBridge.gs</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: MANAGE -->
+        <div class="admin-tab-panel" id="tabPanelManage">
+          <div class="manage-list" id="adminManageList"></div>
+        </div>
+
+        <!-- TAB 4: SETTINGS -->
+        <div class="admin-tab-panel" id="tabPanelSettings">
+          <form class="settings-form" id="settingsForm">
+            <div class="form-grid-2">
+              <label class="field">
+                <span>Nama Toko</span>
+                <input type="text" id="sStoreName" required />
+              </label>
+              <label class="field">
+                <span>Nomor WhatsApp (format 628xxx)</span>
+                <input type="text" id="sWhatsapp" placeholder="6285734103666" required />
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Tagline Singkat</span>
+                <input type="text" id="sTagline" />
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Alamat / Info Layanan</span>
+                <input type="text" id="sAddress" />
+              </label>
+            </div>
+
+            <hr class="divider-hr" />
+            <h4 class="settings-subhead">Google Drive &amp; AI</h4>
+            <div class="form-grid-2">
+              <label class="field">
+                <span>Link / ID Folder Google Drive</span>
+                <input type="text" id="sDriveFolderId" placeholder="1W8wTEg03Aqiv-rJHvoFngwYpg1u-Hjlw" />
+              </label>
+              <label class="field">
+                <span>Google Apps Script Bridge URL (Vercel)</span>
+                <input type="url" id="sGasBridgeUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+              </label>
+            </div>
+
+            <div class="form-grid-3">
+              <label class="field">
+                <span>Google Drive API Key (Opsional)</span>
+                <input type="password" id="sDriveApiKey" placeholder="Opsional" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span>Gemini API Key (Opsional — AI Vision)</span>
+                <input type="password" id="sGeminiKey" placeholder="AIza... (opsional)" autocomplete="off" />
+                <small class="field-help" id="sGeminiStatus">Tanpa API Key, OCR bawaan tetap aktif gratis.</small>
+              </label>
+              <label class="field">
+                <span>Ganti PIN Admin</span>
+                <input type="password" id="sAdminPin" placeholder="Kosongkan jika tetap" autocomplete="new-password" />
+              </label>
+            </div>
+
+            <div class="form-footer">
+              <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
