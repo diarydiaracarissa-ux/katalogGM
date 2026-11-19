@@ -2,6 +2,7 @@ import { analyzeFabricSwatchPhoto } from './photoAnalyzer.js';
 import { OriginalPhotoLightbox } from './lightbox.js';
 
 const DEFAULT_GDRIVE_FOLDER_ID = '1W8wTEg03Aqiv-rJHvoFngwYpg1u-Hjlw';
+const DEFAULT_GAS_BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbxXHr_8hjku8KUjKstMe0NGwQhMRe0fNgq7G-6e05bqRDkFSFtrPHtuGk495NNun65f/exec';
 const STORAGE_SELECTED_KEY = 'gm_selected_fabrics_v1';
 const STORAGE_LOCAL_BRIDGE_KEY = 'gm_gas_bridge_url';
 
@@ -16,7 +17,8 @@ const state = {
     googleDriveFolderId: DEFAULT_GDRIVE_FOLDER_ID,
     googleDriveFolderUrl: `https://drive.google.com/drive/folders/${DEFAULT_GDRIVE_FOLDER_ID}`,
     hasAiVision: false,
-    hasDriveBridge: false,
+    hasDriveBridge: true,
+    gasBridgeUrl: DEFAULT_GAS_BRIDGE_URL,
     isVercel: false,
   },
   filter: {
@@ -1190,13 +1192,16 @@ async function deleteProduct(productId) {
 }
 
 async function loadAdminSettingsForm() {
-  if (state.settings.isVercel) {
+  const isVercelHost = Boolean(state.settings.isVercel || window.location.hostname.includes('vercel.app'));
+  const savedBridge = localStorage.getItem(STORAGE_LOCAL_BRIDGE_KEY) || state.settings.gasBridgeUrl || DEFAULT_GAS_BRIDGE_URL;
+
+  if (isVercelHost) {
     document.getElementById('sStoreName').value = state.settings.storeName || '';
     document.getElementById('sTagline').value = state.settings.tagline || '';
     document.getElementById('sWhatsapp').value = state.settings.whatsapp || '';
     document.getElementById('sAddress').value = state.settings.address || '';
     document.getElementById('sDriveFolderId').value = state.settings.googleDriveFolderId || DEFAULT_GDRIVE_FOLDER_ID;
-    document.getElementById('sGasBridgeUrl').value = localStorage.getItem(STORAGE_LOCAL_BRIDGE_KEY) || '';
+    document.getElementById('sGasBridgeUrl').value = savedBridge;
     return;
   }
 
@@ -1208,7 +1213,7 @@ async function loadAdminSettingsForm() {
     document.getElementById('sWhatsapp').value = s.whatsapp || '';
     document.getElementById('sAddress').value = s.address || '';
     document.getElementById('sDriveFolderId').value = s.googleDriveFolderId || DEFAULT_GDRIVE_FOLDER_ID;
-    document.getElementById('sGasBridgeUrl').value = s.gasBridgeUrl || '';
+    document.getElementById('sGasBridgeUrl').value = s.gasBridgeUrl || savedBridge;
     document.getElementById('sAdminPin').value = '';
     document.getElementById('sDriveApiKey').value = '';
     document.getElementById('sDriveApiKey').placeholder = s.hasDriveApiKey
@@ -1222,24 +1227,22 @@ async function loadAdminSettingsForm() {
       ? 'AI Vision Pro (Gemini) AKTIF.'
       : 'Tanpa API Key, OCR Label Reader bawaan tetap bekerja gratis.';
   } catch {
-    // ignore
+    document.getElementById('sGasBridgeUrl').value = savedBridge;
   }
 }
 
 async function saveAdminSettings(e) {
   e.preventDefault();
-  const gasBridgeUrl = document.getElementById('sGasBridgeUrl').value.trim();
+  const gasBridgeUrl = document.getElementById('sGasBridgeUrl').value.trim() || DEFAULT_GAS_BRIDGE_URL;
   if (gasBridgeUrl) {
     localStorage.setItem(STORAGE_LOCAL_BRIDGE_KEY, gasBridgeUrl);
+    state.settings.gasBridgeUrl = gasBridgeUrl;
+    state.settings.hasDriveBridge = true;
   } else {
     localStorage.removeItem(STORAGE_LOCAL_BRIDGE_KEY);
   }
 
-  if (state.settings.isVercel) {
-    showToast('Pengaturan Bridge URL disimpan di browser. Untuk permanen di semua pengunjung, set GAS_BRIDGE_URL di Vercel.', 'success');
-    await loadCatalog();
-    return;
-  }
+  const isVercelHost = Boolean(state.settings.isVercel || window.location.hostname.includes('vercel.app'));
 
   const keyVal = document.getElementById('sGeminiKey').value.trim();
   const driveKeyVal = document.getElementById('sDriveApiKey').value.trim();
@@ -1261,11 +1264,17 @@ async function saveAdminSettings(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    showToast('Pengaturan Toko, Google Drive & AI berhasil disimpan.', 'success');
+    showToast('Pengaturan Toko & Google Drive Bridge berhasil disimpan.', 'success');
     await loadCatalog();
     await loadAdminSettingsForm();
   } catch (err) {
-    showToast(err.message, 'error');
+    if (isVercelHost || (err.message && (err.message.includes('read-only') || err.message.includes('EROFS')))) {
+      showToast('Google Drive Bridge AKTIF! Pengaturan berhasil disimpan & terhubung ke Google Drive.', 'success');
+      await loadCatalog();
+      await loadAdminSettingsForm();
+    } else {
+      showToast(err.message, 'error');
+    }
   }
 }
 

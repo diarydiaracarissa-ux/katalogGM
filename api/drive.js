@@ -22,10 +22,12 @@ module.exports = async (req, res) => {
       return res.status(200).send(buffer);
     }
 
+    const DEFAULT_BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbxXHr_8hjku8KUjKstMe0NGwQhMRe0fNgq7G-6e05bqRDkFSFtrPHtuGk495NNun65f/exec';
+
     // List/sync files from Google Drive folder
     if (req.method === 'GET' && action === 'sync') {
       const folderId = req.query.folderId || process.env.GOOGLE_DRIVE_FOLDER_ID || DEFAULT_FOLDER_ID;
-      const gasBridgeUrl = req.query.bridgeUrl || process.env.GAS_BRIDGE_URL || '';
+      const gasBridgeUrl = req.query.bridgeUrl || process.env.GAS_BRIDGE_URL || DEFAULT_BRIDGE_URL;
       const googleDriveApiKey = req.query.driveApiKey || process.env.GOOGLE_DRIVE_API_KEY || '';
       const result = await syncDriveFolder({ folderId, gasBridgeUrl, googleDriveApiKey });
       return res.status(200).json({ ok: true, folderId, ...result });
@@ -34,7 +36,7 @@ module.exports = async (req, res) => {
     // Proxy POST upload / save_catalog / delete_file to Google Apps Script Bridge
     if (req.method === 'POST') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
-      const bridgeUrl = body.bridgeUrl || process.env.GAS_BRIDGE_URL || '';
+      const bridgeUrl = body.bridgeUrl || process.env.GAS_BRIDGE_URL || DEFAULT_BRIDGE_URL;
       if (!bridgeUrl) {
         return res.status(400).json({
           ok: false,

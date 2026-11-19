@@ -24,8 +24,9 @@ function readBundledCatalog() {
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
+  const DEFAULT_BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbxXHr_8hjku8KUjKstMe0NGwQhMRe0fNgq7G-6e05bqRDkFSFtrPHtuGk495NNun65f/exec';
   try {
-    const bridgeUrl = req.query.bridgeUrl || process.env.GAS_BRIDGE_URL || '';
+    const bridgeUrl = req.query.bridgeUrl || process.env.GAS_BRIDGE_URL || DEFAULT_BRIDGE_URL;
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || DEFAULT_FOLDER_ID;
     const bundled = readBundledCatalog();
 

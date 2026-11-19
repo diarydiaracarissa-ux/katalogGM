@@ -27,11 +27,16 @@ const PROTECTED_SAMPLE_FILES = new Set([
   'NB-07A-STERLING.jpg',
 ]);
 
+const USER_GAS_BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbxXHr_8hjku8KUjKstMe0NGwQhMRe0fNgq7G-6e05bqRDkFSFtrPHtuGk495NNun65f/exec';
+
+let inMemorySettings = null;
+let inMemoryProducts = null;
+
 function ensureDirs() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-  fs.mkdirSync(PUBLIC_UPLOADS_DIR, { recursive: true });
-  fs.mkdirSync(path.dirname(PUBLIC_CATALOG_FILE), { recursive: true });
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch {}
+  try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch {}
+  try { fs.mkdirSync(PUBLIC_UPLOADS_DIR, { recursive: true }); } catch {}
+  try { fs.mkdirSync(path.dirname(PUBLIC_CATALOG_FILE), { recursive: true }); } catch {}
 }
 
 const DEFAULT_SETTINGS = {
@@ -44,7 +49,7 @@ const DEFAULT_SETTINGS = {
   geminiApiKey: '',
   googleDriveFolderId: DEFAULT_GDRIVE_FOLDER_ID,
   googleDriveApiKey: '',
-  gasBridgeUrl: '',
+  gasBridgeUrl: process.env.GAS_BRIDGE_URL || USER_GAS_BRIDGE_URL,
 };
 
 const SEED_FABRICS = [
@@ -163,46 +168,61 @@ function syncPublicStaticCatalog(products, settings) {
 }
 
 function initStorage(forceResetIfOldSchema = true) {
-  ensureDirs();
-  if (!fs.existsSync(SETTINGS_FILE)) {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2), 'utf8');
-  }
-  let shouldSeed = !fs.existsSync(CATALOG_FILE);
-  if (!shouldSeed && forceResetIfOldSchema) {
-    try {
-      const existing = JSON.parse(fs.readFileSync(CATALOG_FILE, 'utf8'));
-      // Upgrade seamlessly if previous seed was old curtain-room demo without fabric `code` & `collection`
-      if (Array.isArray(existing) && existing.length > 0 && !existing[0].code && !existing[0].collection) {
+  try {
+    ensureDirs();
+    if (!fs.existsSync(SETTINGS_FILE)) {
+      try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2), 'utf8'); } catch {}
+    }
+    let shouldSeed = !fs.existsSync(CATALOG_FILE);
+    if (!shouldSeed && forceResetIfOldSchema) {
+      try {
+        const existing = JSON.parse(fs.readFileSync(CATALOG_FILE, 'utf8'));
+        if (Array.isArray(existing) && existing.length > 0 && !existing[0].code && !existing[0].collection) {
+          shouldSeed = true;
+        }
+      } catch {
         shouldSeed = true;
       }
-    } catch {
-      shouldSeed = true;
     }
-  }
 
-  if (shouldSeed) {
-    const hydrated = hydrateFileSizes(SEED_FABRICS);
-    fs.writeFileSync(CATALOG_FILE, JSON.stringify(hydrated, null, 2), 'utf8');
-    syncPublicStaticCatalog(hydrated, getSettings());
-  } else if (!fs.existsSync(PUBLIC_CATALOG_FILE)) {
-    syncPublicStaticCatalog(getProducts(), getSettings());
+    if (shouldSeed) {
+      const hydrated = hydrateFileSizes(SEED_FABRICS);
+      try { fs.writeFileSync(CATALOG_FILE, JSON.stringify(hydrated, null, 2), 'utf8'); } catch {}
+      syncPublicStaticCatalog(hydrated, getSettings());
+    } else if (!fs.existsSync(PUBLIC_CATALOG_FILE)) {
+      syncPublicStaticCatalog(getProducts(), getSettings());
+    }
+  } catch (err) {
+    // Ignore read-only errors on serverless
   }
 }
 
 function getSettings() {
-  ensureDirs();
-  if (!fs.existsSync(SETTINGS_FILE)) {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2), 'utf8');
-    return { ...DEFAULT_SETTINGS };
-  }
+  if (inMemorySettings) return inMemorySettings;
   try {
-    const raw = fs.readFileSync(SETTINGS_FILE, 'utf8');
-    const merged = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
-    if (!merged.googleDriveFolderId) merged.googleDriveFolderId = DEFAULT_GDRIVE_FOLDER_ID;
-    return merged;
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
+    ensureDirs();
+    if (fs.existsSync(SETTINGS_FILE)) {
+      const raw = fs.readFileSync(SETTINGS_FILE, 'utf8');
+      const merged = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+      if (!merged.googleDriveFolderId) merged.googleDriveFolderId = DEFAULT_GDRIVE_FOLDER_ID;
+      if (!merged.gasBridgeUrl || merged.gasBridgeUrl === '') {
+        merged.gasBridgeUrl = process.env.GAS_BRIDGE_URL || USER_GAS_BRIDGE_URL;
+      }
+      return merged;
+    }
+  } catch {}
+
+  try {
+    if (fs.existsSync('/tmp/settings.json')) {
+      const raw = fs.readFileSync('/tmp/settings.json', 'utf8');
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    }
+  } catch {}
+
+  return {
+    ...DEFAULT_SETTINGS,
+    gasBridgeUrl: process.env.GAS_BRIDGE_URL || USER_GAS_BRIDGE_URL,
+  };
 }
 
 function extractDriveFolderId(input = '') {
@@ -232,17 +252,27 @@ function saveSettings(partial) {
         ? partial.googleDriveApiKey.trim()
         : current.googleDriveApiKey,
     gasBridgeUrl:
-      typeof partial.gasBridgeUrl === 'string'
+      typeof partial.gasBridgeUrl === 'string' && partial.gasBridgeUrl.trim()
         ? partial.gasBridgeUrl.trim()
-        : current.gasBridgeUrl,
+        : current.gasBridgeUrl || USER_GAS_BRIDGE_URL,
   };
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2), 'utf8');
+
+  inMemorySettings = next;
+
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2), 'utf8');
+  } catch (err) {
+    try {
+      fs.writeFileSync('/tmp/settings.json', JSON.stringify(next, null, 2), 'utf8');
+    } catch {}
+  }
   syncPublicStaticCatalog(getProducts(), next);
   return next;
 }
 
 function getPublicSettings() {
   const s = getSettings();
+  const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NOW_REGION);
   return {
     storeName: s.storeName,
     mainWebsite: s.mainWebsite || 'https://www.gordenmagelang.web.id',
@@ -251,29 +281,45 @@ function getPublicSettings() {
     address: s.address,
     googleDriveFolderId: s.googleDriveFolderId || DEFAULT_GDRIVE_FOLDER_ID,
     googleDriveFolderUrl: `https://drive.google.com/drive/folders/${s.googleDriveFolderId || DEFAULT_GDRIVE_FOLDER_ID}`,
-    hasAiVision: Boolean(s.geminiApiKey && s.geminiApiKey.trim()),
-    hasDriveBridge: Boolean(s.gasBridgeUrl && s.gasBridgeUrl.trim()),
+    hasAiVision: Boolean(s.geminiApiKey && s.geminiApiKey.trim()) || Boolean(process.env.GEMINI_API_KEY),
+    hasDriveBridge: Boolean(s.gasBridgeUrl && s.gasBridgeUrl.trim()) || Boolean(process.env.GAS_BRIDGE_URL),
     hasDriveApiKey: Boolean(s.googleDriveApiKey && s.googleDriveApiKey.trim()),
+    gasBridgeUrl: s.gasBridgeUrl || USER_GAS_BRIDGE_URL,
+    isVercel,
   };
 }
 
 function getProducts() {
+  if (inMemoryProducts) return inMemoryProducts;
   initStorage();
   try {
     const raw = fs.readFileSync(CATALOG_FILE, 'utf8');
     const items = JSON.parse(raw);
     return hydrateFileSizes(Array.isArray(items) ? items : []);
   } catch {
+    try {
+      if (fs.existsSync('/tmp/catalog.json')) {
+        const items = JSON.parse(fs.readFileSync('/tmp/catalog.json', 'utf8'));
+        return hydrateFileSizes(Array.isArray(items) ? items : []);
+      }
+    } catch {}
     return hydrateFileSizes(SEED_FABRICS);
   }
 }
 
 function saveProducts(products) {
-  ensureDirs();
-  const tmpFile = `${CATALOG_FILE}.tmp`;
-  fs.writeFileSync(tmpFile, JSON.stringify(products, null, 2), 'utf8');
-  fs.renameSync(tmpFile, CATALOG_FILE);
-  syncPublicStaticCatalog(products, getSettings());
+  inMemoryProducts = products;
+  try {
+    ensureDirs();
+    const tmpFile = `${CATALOG_FILE}.tmp`;
+    fs.writeFileSync(tmpFile, JSON.stringify(products, null, 2), 'utf8');
+    fs.renameSync(tmpFile, CATALOG_FILE);
+    syncPublicStaticCatalog(products, getSettings());
+  } catch (err) {
+    try {
+      fs.writeFileSync('/tmp/catalog.json', JSON.stringify(products, null, 2), 'utf8');
+    } catch {}
+  }
 }
 
 function saveUploadedPhoto(fileObj, codeHint = '') {
@@ -302,8 +348,15 @@ function saveUploadedPhoto(fileObj, codeHint = '') {
   const publicPath = path.join(PUBLIC_UPLOADS_DIR, finalName);
 
   // Save verbatim original bytes (lossless) to both uploads/ and public/uploads/ (Vercel-ready)
-  fs.writeFileSync(fullPath, fileObj.data);
-  fs.writeFileSync(publicPath, fileObj.data);
+  try {
+    fs.writeFileSync(fullPath, fileObj.data);
+    fs.writeFileSync(publicPath, fileObj.data);
+  } catch (err) {
+    try {
+      const tmpPath = path.join('/tmp', finalName);
+      fs.writeFileSync(tmpPath, fileObj.data);
+    } catch {}
+  }
 
   return {
     filename: finalName,
