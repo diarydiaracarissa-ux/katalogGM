@@ -907,6 +907,7 @@ async function submitProductForm(e) {
             filename: `${fields.code}-${fields.colorName || 'KAIN'}.jpg`.replace(/\s+/g, '-'),
             mimeType: state.upload.file.type || 'image/jpeg',
             base64,
+            ...fields,
           }),
         });
         finalImageUrl = upRes.file.imageUrl;
