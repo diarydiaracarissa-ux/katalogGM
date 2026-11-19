@@ -37,7 +37,9 @@ module.exports = async (req, res) => {
       try {
         const remote = await fetchFromGasBridge(bridgeUrl, 'catalog');
         if (Array.isArray(remote.products) && remote.products.length > 0) {
-          products = remote.products;
+          const remoteCodes = new Set(remote.products.map(p => p.code || p.id));
+          const unrepeatedBundled = (bundled.products || []).filter(p => !remoteCodes.has(p.code) && !remoteCodes.has(p.id));
+          products = [...remote.products, ...unrepeatedBundled];
         }
         if (remote.settings) {
           remoteSettings = remote.settings;
